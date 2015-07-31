@@ -1,6 +1,7 @@
 package com.github.jkschneider.netty.jssc;
 
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.*;
+
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultChannelConfig;
@@ -103,7 +104,7 @@ final class DefaultJsscChannelConfig extends DefaultChannelConfig implements Jss
     @Override
     public JsscChannelConfig setParitybit(Integer paritybit) {
         this.paritybit = paritybit;
-        return  this;
+        return this;
     }
 
     @Override
@@ -198,11 +199,11 @@ final class DefaultJsscChannelConfig extends DefaultChannelConfig implements Jss
         return this;
     }
 
-    @Override
+/*    @Override
     public JsscChannelConfig setAutoClose(boolean autoClose) {
         super.setAutoClose(autoClose);
         return this;
-    }
+    }*/
 
     @Override
     public JsscChannelConfig setWriteBufferHighWaterMark(int writeBufferHighWaterMark) {

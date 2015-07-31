@@ -7,6 +7,7 @@ import static com.github.jkschneider.netty.jssc.JsscChannelOption.PARITY_BIT;
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.RTS;
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.STOP_BITS;
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.WAIT_TIME;
+
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.oio.OioByteStreamChannel;
 
@@ -37,7 +38,6 @@ public class JsscChannel extends OioByteStreamChannel {
 
     public JsscChannel() {
         super(null);
-
         config = new DefaultJsscChannelConfig(this);
     }
 
@@ -66,7 +66,7 @@ public class JsscChannel extends OioByteStreamChannel {
     }
 
     protected void doInit() throws Exception {
-    	System.out.println("Setting PARAMS!");
+        System.out.println("Setting PARAMS!");
         serialPort.setParams(
             config().getOption(BAUD_RATE),
             config().getOption(DATA_BITS),
@@ -75,27 +75,27 @@ public class JsscChannel extends OioByteStreamChannel {
             config().getOption(RTS),
             config().getOption(DTR)
         );
-        
+
         final PipedOutputStream writeStream = new PipedOutputStream();
         PipedInputStream readStream = new PipedInputStream(writeStream);
-        	
+
         serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
         serialPort.addEventListener(new SerialPortEventListener() {
-			@Override
-			public void serialEvent(SerialPortEvent event) {
-				if(event.isRXCHAR()) {
-					try {
-						writeStream.write(serialPort.readBytes(event.getEventValue()));
-						writeStream.flush();
-					} catch (SerialPortException e) {
-						throw new IllegalStateException(e);
-					} catch (IOException e) {
+            @Override
+            public void serialEvent(SerialPortEvent event) {
+                if (event.isRXCHAR()) {
+                    try {
+                        writeStream.write(serialPort.readBytes(event.getEventValue()));
+                        writeStream.flush();
+                    } catch (SerialPortException e) {
+                        throw new IllegalStateException(e);
+                    } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
-				}
-			}
-		});
-        
+                }
+            }
+        });
+
         activate(readStream, jsscOutputStream);
     }
 
@@ -133,9 +133,9 @@ public class JsscChannel extends OioByteStreamChannel {
     protected void doClose() throws Exception {
         open = false;
         try {
-           super.doClose();
+            super.doClose();
         } finally {
-        	System.out.println("CLOSING!");
+            System.out.println("CLOSING!");
             if (serialPort != null) {
                 serialPort.closePort();
                 serialPort = null;
@@ -144,37 +144,37 @@ public class JsscChannel extends OioByteStreamChannel {
     }
 
     private final OutputStream jsscOutputStream = new OutputStream() {
-		@Override
-		public void write(int b) throws IOException {
-			try {
-				serialPort.writeInt(b);
-			} catch (SerialPortException e) {
-				throw new IllegalStateException(e); 
-			}
-		}
-		
-		@Override
-		public void write(byte[] b) throws IOException {
-			try {
-				serialPort.writeBytes(b);
-			} catch (SerialPortException e) {
-				throw new IllegalStateException(e);
-			}
-		}
-		
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException {
-			byte[] partialB = new byte[len];
-			System.arraycopy(b, off, partialB, 0, len);
-			write(partialB);
-		}
+        @Override
+        public void write(int b) throws IOException {
+            try {
+                serialPort.writeInt(b);
+            } catch (SerialPortException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            try {
+                serialPort.writeBytes(b);
+            } catch (SerialPortException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            byte[] partialB = new byte[len];
+            System.arraycopy(b, off, partialB, 0, len);
+            write(partialB);
+        }
     };
-    
+
     private final class JsscUnsafe extends AbstractUnsafe {
         @Override
         public void connect(
-                final SocketAddress remoteAddress,
-                final SocketAddress localAddress, final ChannelPromise promise) {
+            final SocketAddress remoteAddress,
+            final SocketAddress localAddress, final ChannelPromise promise) {
             if (!promise.setUncancellable() || !ensureOpen(promise)) {
                 return;
             }
@@ -199,7 +199,7 @@ public class JsscChannel extends OioByteStreamChannel {
                                 closeIfClosed();
                             }
                         }
-                   }, waitTime, TimeUnit.MILLISECONDS);
+                    }, waitTime, TimeUnit.MILLISECONDS);
                 } else {
                     doInit();
                     safeSetSuccess(promise);
