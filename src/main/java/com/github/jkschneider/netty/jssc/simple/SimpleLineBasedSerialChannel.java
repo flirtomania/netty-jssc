@@ -49,4 +49,5 @@ public class SimpleLineBasedSerialChannel {
         f.channel().closeFuture().syncUninterruptibly();
         group.shutdownGracefully();
     }
+
 }

@@ -8,6 +8,7 @@ import static com.github.jkschneider.netty.jssc.JsscChannelOption.RTS;
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.STOP_BITS;
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.WAIT_TIME;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.oio.OioByteStreamChannel;
 
@@ -54,6 +55,31 @@ public class JsscChannel extends OioByteStreamChannel {
     @Override
     protected AbstractUnsafe newUnsafe() {
         return new JsscUnsafe();
+    }
+
+    /**
+     * this is important code
+     * if you remove it channel will end up in deadlock
+     * fixme possible locking issues see isReadPending()
+     *
+     * @param buf
+     * @return
+     * @throws Exception
+     */
+    @Override
+    protected int doReadBytes(ByteBuf buf) throws Exception {
+        // because doc says DO NOT USE currentTimeMillis() for timeout measurement
+        long timestamp = System.nanoTime();
+        while (true) {
+            if (available() > 0) {
+                break;
+            }
+            Thread.sleep(50);
+            if (System.nanoTime() - timestamp > 1000 * 1_000_000) {
+                return 0;
+            }
+        }
+        return super.doReadBytes(buf);
     }
 
     @Override
