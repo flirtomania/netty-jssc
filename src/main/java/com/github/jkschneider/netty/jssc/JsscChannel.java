@@ -68,16 +68,8 @@ public class JsscChannel extends OioByteStreamChannel {
      */
     @Override
     protected int doReadBytes(ByteBuf buf) throws Exception {
-        // because doc says DO NOT USE currentTimeMillis() for timeout measurement
-        long timestamp = System.nanoTime();
-        while (true) {
-            if (available() > 0) {
-                break;
-            }
-            Thread.sleep(50);
-            if (System.nanoTime() - timestamp > 1000 * 1_000_000) {
-                return 0;
-            }
+        if (available() == 0) {
+            return 0;
         }
         return super.doReadBytes(buf);
     }
