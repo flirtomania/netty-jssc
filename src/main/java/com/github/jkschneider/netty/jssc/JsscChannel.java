@@ -162,6 +162,7 @@ public class JsscChannel extends OioByteStreamChannel {
     }
 
     private final OutputStream jsscOutputStream = new OutputStream() {
+
         @Override
         public void write(int b) throws IOException {
             try {
@@ -186,6 +187,7 @@ public class JsscChannel extends OioByteStreamChannel {
             System.arraycopy(b, off, partialB, 0, len);
             write(partialB);
         }
+
     };
 
     private final class JsscUnsafe extends AbstractUnsafe {

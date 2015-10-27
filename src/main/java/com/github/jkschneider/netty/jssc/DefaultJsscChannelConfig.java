@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Default configuration class for JSSC device connections.
  */
-final class DefaultJsscChannelConfig extends DefaultChannelConfig implements JsscChannelConfig {
+public final class DefaultJsscChannelConfig extends DefaultChannelConfig implements JsscChannelConfig {
 
     private volatile int baudrate = 9600;
     private volatile boolean dtr;
