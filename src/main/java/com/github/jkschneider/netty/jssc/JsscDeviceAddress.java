@@ -27,4 +27,11 @@ public class JsscDeviceAddress extends SocketAddress {
     public String value() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "JsscDeviceAddress{" +
+                "value='" + value + '\'' +
+                '}';
+    }
 }

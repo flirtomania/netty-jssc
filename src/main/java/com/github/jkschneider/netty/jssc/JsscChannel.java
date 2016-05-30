@@ -9,6 +9,7 @@ import static com.github.jkschneider.netty.jssc.JsscChannelOption.STOP_BITS;
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.WAIT_TIME;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.oio.OioByteStreamChannel;
 
@@ -23,17 +24,22 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A channel to a serial device using the Jssc library.
  */
 public class JsscChannel extends OioByteStreamChannel {
 
+    private static final Logger log = LoggerFactory.getLogger(JsscChannel.class);
+
     private static final JsscDeviceAddress LOCAL_ADDRESS = new JsscDeviceAddress("localhost");
 
     private final JsscChannelConfig config;
 
     private boolean open = true;
+
     private JsscDeviceAddress deviceAddress;
     private SerialPort serialPort;
 
@@ -68,10 +74,28 @@ public class JsscChannel extends OioByteStreamChannel {
      */
     @Override
     protected int doReadBytes(ByteBuf buf) throws Exception {
-        if (available() == 0) {
+        if (!open) {
+            return -1;
+        }
+        if (available() <= 0) {
+            // throttle to reduce cpu
+            Thread.yield();
+            Thread.sleep(2);
             return 0;
         }
-        return super.doReadBytes(buf);
+        int read = super.doReadBytes(buf);
+        log.trace("read {}", read);
+        return read;
+    }
+
+    @Override
+    protected boolean isInputShutdown() {
+        return !open;
+    }
+
+    @Override
+    protected ChannelFuture shutdownInput() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -86,29 +110,31 @@ public class JsscChannel extends OioByteStreamChannel {
     protected void doInit() throws Exception {
         System.out.println("Setting PARAMS!");
         serialPort.setParams(
-            config().getOption(BAUD_RATE),
-            config().getOption(DATA_BITS),
-            config().getOption(STOP_BITS),
-            config().getOption(PARITY_BIT),
-            config().getOption(RTS),
-            config().getOption(DTR)
+                config().getOption(BAUD_RATE),
+                config().getOption(DATA_BITS),
+                config().getOption(STOP_BITS),
+                config().getOption(PARITY_BIT),
+                config().getOption(RTS),
+                config().getOption(DTR)
         );
 
         final PipedOutputStream writeStream = new PipedOutputStream();
-        PipedInputStream readStream = new PipedInputStream(writeStream);
+        // DEFAULT PIPE SIZE = 4096
+        PipedInputStream readStream = new PipedInputStream(writeStream, 8192);
 
         serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
         serialPort.addEventListener(new SerialPortEventListener() {
             @Override
             public void serialEvent(SerialPortEvent event) {
                 if (event.isRXCHAR()) {
+                    log.trace("rxchar:{}", event.getEventValue());
                     try {
-                        writeStream.write(serialPort.readBytes(event.getEventValue()));
+                        byte[] bytes = serialPort.readBytes(event.getEventValue());
+                        log.trace("rxchar read:{}", bytes.length);
+                        writeStream.write(bytes);
                         writeStream.flush();
-                    } catch (SerialPortException e) {
-                        throw new IllegalStateException(e);
-                    } catch (IOException e) {
-                        throw new IllegalStateException(e);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -162,7 +188,6 @@ public class JsscChannel extends OioByteStreamChannel {
     }
 
     private final OutputStream jsscOutputStream = new OutputStream() {
-
         @Override
         public void write(int b) throws IOException {
             try {
@@ -187,14 +212,11 @@ public class JsscChannel extends OioByteStreamChannel {
             System.arraycopy(b, off, partialB, 0, len);
             write(partialB);
         }
-
     };
 
     private final class JsscUnsafe extends AbstractUnsafe {
         @Override
-        public void connect(
-            final SocketAddress remoteAddress,
-            final SocketAddress localAddress, final ChannelPromise promise) {
+        public void connect(final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise promise) {
             if (!promise.setUncancellable() || !ensureOpen(promise)) {
                 return;
             }
