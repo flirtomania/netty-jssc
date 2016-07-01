@@ -95,7 +95,7 @@ public class JsscChannel extends OioByteStreamChannel {
 
     @Override
     protected ChannelFuture shutdownInput() {
-        throw new UnsupportedOperationException();
+        return newFailedFuture(new UnsupportedOperationException("shutdownInput"));
     }
 
     @Override
@@ -133,7 +133,7 @@ public class JsscChannel extends OioByteStreamChannel {
                         log.trace("rxchar read:{}", bytes.length);
                         writeStream.write(bytes);
                         writeStream.flush();
-                    } catch (Exception e) {
+                    } catch (IOException | SerialPortException e) {
                         throw new RuntimeException(e);
                     }
                 }
