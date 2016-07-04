@@ -119,7 +119,6 @@ public class JsscChannel extends OioByteStreamChannel {
         );
 
         final PipedOutputStream writeStream = new PipedOutputStream();
-        // DEFAULT PIPE SIZE = 4096
         PipedInputStream readStream = new PipedInputStream(writeStream, 8192);
 
         serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
