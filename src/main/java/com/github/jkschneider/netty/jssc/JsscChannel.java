@@ -1,17 +1,15 @@
 package com.github.jkschneider.netty.jssc;
 
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.BAUD_RATE;
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.DATA_BITS;
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.DTR;
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.PARITY_BIT;
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.RTS;
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.STOP_BITS;
-import static com.github.jkschneider.netty.jssc.JsscChannelOption.WAIT_TIME;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.oio.OioByteStreamChannel;
+import jssc.SerialPort;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,12 +18,7 @@ import java.io.PipedOutputStream;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.github.jkschneider.netty.jssc.JsscChannelOption.*;
 
 /**
  * A channel to a serial device using the Jssc library.
@@ -119,6 +112,7 @@ public class JsscChannel extends OioByteStreamChannel {
         );
 
         final PipedOutputStream writeStream = new PipedOutputStream();
+        // increased default size to 8k, because default size
         PipedInputStream readStream = new PipedInputStream(writeStream, 8192);
 
         serialPort.setEventsMask(SerialPort.MASK_RXCHAR);

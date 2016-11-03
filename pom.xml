@@ -3,11 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jkschneider</groupId>
     <artifactId>netty-jssc</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.3-SNAPSHOT</version>
+
     <scm>
-        <connection>scm:git:git@github.com:jkschneider/netty-jssc.git</connection>
-        <developerConnection>scm:git:git@github.com:jkschneider/netty-jssc.git</developerConnection>
-        <url>git@github.com:jkschneider/netty-jssc.git</url>
+        <connection>scm:git:git@github.com:tttomat19/netty-jssc.git</connection>
+        <developerConnection>scm:git:git@github.com:tttomat19/netty-jssc.git</developerConnection>
+        <url>git@github.com:tttomat19/netty-jssc.git</url>
     </scm>
 
     <dependencies>
@@ -15,7 +16,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.1.Final</version>
+            <version>4.1.6.Final</version>
         </dependency>
 
         <dependency>
