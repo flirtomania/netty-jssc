@@ -150,9 +150,6 @@ public interface JsscChannelConfig extends ChannelConfig {
     @Override
     JsscChannelConfig setAutoRead(boolean autoRead);
 
-    /*@Override
-    JsscChannelConfig setAutoClose(boolean autoClose);*/
-
     @Override
     JsscChannelConfig setWriteBufferHighWaterMark(int writeBufferHighWaterMark);
 

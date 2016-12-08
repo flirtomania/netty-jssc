@@ -17,6 +17,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import static com.github.jkschneider.netty.jssc.JsscChannelOption.*;
 
@@ -72,8 +73,9 @@ public class JsscChannel extends OioByteStreamChannel {
         }
         if (available() <= 0) {
             // throttle to reduce cpu
-            Thread.yield();
-            Thread.sleep(2);
+            //Thread.sleep(1);
+            //Thread.sleep(0, 100_000);
+            LockSupport.parkNanos(100_000);
             return 0;
         }
         int read = super.doReadBytes(buf);
@@ -112,8 +114,8 @@ public class JsscChannel extends OioByteStreamChannel {
         );
 
         final PipedOutputStream writeStream = new PipedOutputStream();
-        // increased default size to 8k, because default size
-        PipedInputStream readStream = new PipedInputStream(writeStream, 8192);
+        // increased default size to 16k, because default size
+        PipedInputStream readStream = new PipedInputStream(writeStream, 8192 * 2);
 
         serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
         serialPort.addEventListener(new SerialPortEventListener() {
