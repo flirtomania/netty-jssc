@@ -98,12 +98,12 @@ public class JsscChannel extends OioByteStreamChannel {
         JsscDeviceAddress remote = (JsscDeviceAddress) remoteAddress;
         serialPort = new SerialPort(remote.value());
         deviceAddress = remote;
-        System.out.println("Opening port!");
+        log.trace("Opening port {}", remote.value());
         serialPort.openPort();
     }
 
     protected void doInit() throws Exception {
-        System.out.println("Setting PARAMS!");
+        log.trace("Setting params");
         serialPort.setParams(
                 config().getOption(BAUD_RATE),
                 config().getOption(DATA_BITS),
@@ -174,7 +174,7 @@ public class JsscChannel extends OioByteStreamChannel {
         try {
             super.doClose();
         } finally {
-            System.out.println("CLOSING!");
+            log.trace("Closing port");
             if (serialPort != null) {
                 serialPort.closePort();
                 serialPort = null;
